@@ -105,10 +105,10 @@ async def approve(update: Update, context: CallbackContext):
         return
 
     try:
-        # Check if arguments are provided
-        if context.args and context.args[0].isdigit():
-            entity_id = context.args[0]  # ID of user or group to approve
-            approved_users.add(entity_id)  # Add the entity to the approved_users set
+        # Ensure an argument is provided and is a valid chat or group ID
+        if context.args and (context.args[0].lstrip("-").isdigit()):  # Allow negative IDs (e.g., group IDs)
+            entity_id = context.args[0]
+            approved_users.add(entity_id)  # Add the ID (as a string) to the approved_users set
             await context.bot.send_message(chat_id, text=f"✅ Approved: {entity_id}")
         else:
             await context.bot.send_message(chat_id, text="⚠️ Usage: /approve <chat_id or group_id>")
@@ -126,11 +126,11 @@ async def remove(update: Update, context: CallbackContext):
         return
 
     try:
-        # Check if arguments are provided
-        if context.args and context.args[0].isdigit():
-            entity_id = context.args[0]  # ID of user or group to remove
+        # Ensure an argument is provided and is a valid chat or group ID
+        if context.args and (context.args[0].lstrip("-").isdigit()):  # Allow negative IDs (e.g., group IDs)
+            entity_id = context.args[0]
             if entity_id in approved_users:
-                approved_users.remove(entity_id)  # Remove the entity from the approved_users set
+                approved_users.remove(entity_id)  # Remove the ID (as a string) from the approved_users set
                 await context.bot.send_message(chat_id, text=f"✅ Removed: {entity_id}")
             else:
                 await context.bot.send_message(chat_id, text="⚠️ User or group not found in the approved list.")
@@ -138,7 +138,6 @@ async def remove(update: Update, context: CallbackContext):
             await context.bot.send_message(chat_id, text="⚠️ Usage: /remove <chat_id or group_id>")
     except Exception as e:
         await context.bot.send_message(chat_id, text=f"⚠️ Error: {str(e)}")
-
 
 # Handle the attack command
 async def attack(update: Update, context: CallbackContext):
