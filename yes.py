@@ -72,7 +72,7 @@ async def run_attack(chat_id, ip, port, duration, context):
     try:
         # Execute the external command
         process = await asyncio.create_subprocess_shell(
-            f"./alone {ip} {port} {duration}",
+            f"./pushpa {ip} {port} {duration}",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
@@ -94,41 +94,51 @@ async def run_attack(chat_id, ip, port, duration, context):
         )
 
 # Approve users or groups
+# Approve users or groups
 async def approve(update: Update, context: CallbackContext):
     await track_user(update)  # Track the user
     chat_id = update.effective_chat.id
+
+    # Only the admin can approve users or groups
     if update.effective_user.id != ADMIN_USER_ID:
         await context.bot.send_message(chat_id, text="❌ You are not authorized to approve users.")
         return
+
     try:
+        # Check if arguments are provided
         if context.args and context.args[0].isdigit():
-            approved_users.add(context.args[0])
-            await context.bot.send_message(chat_id, text=f"✅ Approved: {context.args[0]}")
-        elif context.args and context.args[0].startswith('-'):  # Check for group ID
-            approved_groups.add(context.args[0])
-            await context.bot.send_message(chat_id, text=f"✅ Approved: {context.args[0]}")
+            entity_id = context.args[0]  # ID of user or group to approve
+            approved_users.add(entity_id)  # Add the entity to the approved_users set
+            await context.bot.send_message(chat_id, text=f"✅ Approved: {entity_id}")
         else:
-            await context.bot.send_message(chat_id, text="⚠️ Usage: /approve <chat_id> or /approve <group_id>")
+            await context.bot.send_message(chat_id, text="⚠️ Usage: /approve <chat_id or group_id>")
     except Exception as e:
         await context.bot.send_message(chat_id, text=f"⚠️ Error: {str(e)}")
 
+# Remove approved users or groups
 async def remove(update: Update, context: CallbackContext):
     await track_user(update)  # Track the user
     chat_id = update.effective_chat.id
+
+    # Only the admin can remove users or groups
     if update.effective_user.id != ADMIN_USER_ID:
         await context.bot.send_message(chat_id, text="❌ You are not authorized to remove users.")
         return
+
     try:
+        # Check if arguments are provided
         if context.args and context.args[0].isdigit():
-            approved_users.discard(context.args[0])
-            await context.bot.send_message(chat_id, text=f"✅ Removed: {context.args[0]}")
-        elif context.args and context.args[0].startswith('-'):  # Check for group ID
-            approved_groups.discard(context.args[0])
-            await context.bot.send_message(chat_id, text=f"✅ Removed: {context.args[0]}")
+            entity_id = context.args[0]  # ID of user or group to remove
+            if entity_id in approved_users:
+                approved_users.remove(entity_id)  # Remove the entity from the approved_users set
+                await context.bot.send_message(chat_id, text=f"✅ Removed: {entity_id}")
+            else:
+                await context.bot.send_message(chat_id, text="⚠️ User or group not found in the approved list.")
         else:
-            await context.bot.send_message(chat_id, text="⚠️ Usage: /remove <chat_id> or /remove <group_id>")
+            await context.bot.send_message(chat_id, text="⚠️ Usage: /remove <chat_id or group_id>")
     except Exception as e:
         await context.bot.send_message(chat_id, text=f"⚠️ Error: {str(e)}")
+
 
 # Handle the attack command
 async def attack(update: Update, context: CallbackContext):
