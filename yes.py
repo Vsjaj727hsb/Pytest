@@ -94,45 +94,42 @@ async def run_attack(chat_id, ip, port, duration, context):
         )
 
 # Approve users or groups
-approved_chats = set()  # To store approved user and group chat IDs
-
 async def approve(update: Update, context: CallbackContext):
     await track_user(update)  # Track the user
     chat_id = update.effective_chat.id
     if update.effective_user.id != ADMIN_USER_ID:
-        await context.bot.send_message(chat_id, text="❌ You are not authorized to approve users/groups.")
+        await context.bot.send_message(chat_id, text="❌ You are not authorized to approve users.")
         return
-
     try:
         if context.args and context.args[0].isdigit():
-            approved_chats.add(int(context.args[0]))  # Add chat_id to approved_chats set
+            approved_users.add(context.args[0])
+            await context.bot.send_message(chat_id, text=f"✅ Approved: {context.args[0]}")
+        elif context.args and context.args[0].startswith('-'):  # Check for group ID
+            approved_groups.add(context.args[0])
             await context.bot.send_message(chat_id, text=f"✅ Approved: {context.args[0]}")
         else:
-            await context.bot.send_message(chat_id, text="⚠️ Usage: /approve <chat_id>")
+            await context.bot.send_message(chat_id, text="⚠️ Usage: /approve <chat_id> or /approve <group_id>")
     except Exception as e:
         await context.bot.send_message(chat_id, text=f"⚠️ Error: {str(e)}")
 
-# Remove approved users or groups
 async def remove(update: Update, context: CallbackContext):
     await track_user(update)  # Track the user
     chat_id = update.effective_chat.id
     if update.effective_user.id != ADMIN_USER_ID:
-        await context.bot.send_message(chat_id, text="❌ You are not authorized to remove users/groups.")
+        await context.bot.send_message(chat_id, text="❌ You are not authorized to remove users.")
         return
-
     try:
         if context.args and context.args[0].isdigit():
-            chat_id_to_remove = int(context.args[0])
-            if chat_id_to_remove in approved_chats:
-                approved_chats.remove(chat_id_to_remove)
-                await context.bot.send_message(chat_id, text=f"✅ Removed: {context.args[0]}")
-            else:
-                await context.bot.send_message(chat_id, text="⚠️ Chat ID not found in approved list.")
+            approved_users.discard(context.args[0])
+            await context.bot.send_message(chat_id, text=f"✅ Removed: {context.args[0]}")
+        elif context.args and context.args[0].startswith('-'):  # Check for group ID
+            approved_groups.discard(context.args[0])
+            await context.bot.send_message(chat_id, text=f"✅ Removed: {context.args[0]}")
         else:
-            await context.bot.send_message(chat_id, text="⚠️ Usage: /remove <chat_id>")
+            await context.bot.send_message(chat_id, text="⚠️ Usage: /remove <chat_id> or /remove <group_id>")
     except Exception as e:
         await context.bot.send_message(chat_id, text=f"⚠️ Error: {str(e)}")
-#GODxCHEATS
+
 # Handle the attack command
 async def attack(update: Update, context: CallbackContext):
     await track_user(update)  # Track the user
